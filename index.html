@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 31st Birthday Cherie Ma | YouTube Premium VIP Pass</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #08080c;
+            color: #f1f1f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 12px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 浪漫 GitHub 本地相片背景輪播圖 */
+        .bg-slideshow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.8s ease-in-out, transform 12s ease-out;
+            filter: brightness(0.55) contrast(1.1);
+            transform: scale(1.05);
+        }
+
+        .bg-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* 漸層遮罩 */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(12, 12, 20, 0.35) 0%, rgba(5, 5, 10, 0.88) 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 背景 Canvas 動畫 */
+        #bgCanvas, #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        #bgCanvas { z-index: 1; }
+        #confettiCanvas { z-index: 10; }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 460px;
+            background: rgba(18, 18, 26, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 28px;
+            padding: 30px 22px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 42, 95, 0.2);
+            margin: auto;
+        }
+
+        /* 生日頂部皇冠橫幅 */
+        .birthday-badge-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .birthday-badge {
+            background: linear-gradient(135deg, #ff2a5f 0%, #ff758c 100%);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 18px;
+            border-radius: 20px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(255, 42, 95, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            animation: pulse 2.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+
+        /* 官方風格 Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .logo-yt {
+            width: 32px;
+            height: 22px;
+            background-color: #FF0000;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+        }
+
+        .play-triangle {
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 9px solid #ffffff;
+            margin-left: 2px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .premium-tag {
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #e0e0e0;
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-left: auto;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #ffffff 0%, #ffd1dc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #cccccc;
+            line-height: 1.55;
+            margin-bottom: 18px;
+        }
+
+        .easter-egg-btn {
+            width: 100%;
+            background: rgba(255, 42, 95, 0.15);
+            border: 1px dashed rgba(255, 117, 140, 0.5);
+            color: #ff8ca3;
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 18px;
+            transition: all 0.25s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .easter-egg-btn:hover {
+            background: rgba(255, 42, 95, 0.28);
+            color: #ffffff;
+            border-color: rgba(255, 117, 140, 0.8);
+        }
+
+        .love-note-card {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, margin 0.3s ease;
+            opacity: 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 0 16px;
+            margin-bottom: 0;
+        }
+
+        .love-note-card.active {
+            max-height: 700px;
+            opacity: 1;
+            padding: 18px 16px;
+            margin-bottom: 20px;
+        }
+
+        .love-note-text {
+            font-size: 13px;
+            color: #f1c40f;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        /* GitHub 專屬相冊輪播器 */
+        .photo-gallery-slider {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            background-color: #000;
+        }
+
+        .gallery-img-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .gallery-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+        }
+
+        .gallery-img.active {
+            opacity: 1;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+            z-index: 5;
+            transition: background 0.2s ease;
+        }
+
+        .slider-btn:hover {
+            background: rgba(255, 42, 95, 0.8);
+        }
+
+        .slider-btn.prev { left: 10px; }
+        .slider-btn.next { right: 10px; }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            z-index: 5;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #ff2a5f;
+            width: 18px;
+            border-radius: 10px;
+        }
+
+        .card-preview {
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.85) 0%, rgba(18, 18, 25, 0.95) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-name {
+            font-size: 11px;
+            color: #ff5e84;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .member-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .features {
+            list-style: none;
+            font-size: 13px;
+            color: #dddddd;
+            line-height: 1.85;
+        }
+
+        .features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .features li .icon {
+            font-size: 14px;
+        }
+
+        /* 表單設計 */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .label {
+            display: block;
+            font-size: 12px;
+            color: #bbbbbb;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: rgba(10, 10, 15, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .email-input:focus {
+            border-color: #25D366;
+            box-shadow: 0 0 15px rgba(37, 211, 102, 0.35);
+            background-color: rgba(5, 5, 10, 0.95);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #25D366 0%, #1da851 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.55);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Modal 視窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #181824;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            padding: 30px 22px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .modal-desc {
+            font-size: 13px;
+            color: #aaaaaa;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+
+        .manual-wa-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .footer-note {
+            margin-top: 22px;
+            font-size: 11px;
+            color: #888888;
+            text-align: center;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 動態背景：調用你 GitHub 倉庫內的 6 張相片 -->
+    <div class="bg-slideshow" id="bgSlideshow">
+        <div class="bg-slide active" style="background-image: url('IMG_0534.jpeg');"></div>
+        <div class="bg-slide" style="background-image: url('IMG_0592.jpeg');"></div>
+        <div class="bg-slide" style="background-image: url('IMG_0611.jpeg');"></div>
+        <div class="bg-slide" style="background-image: url('IMG_0628.jpeg');"></div>
+        <div class="bg-slide" style="background-image: url('IMG_0637.jpeg');"></div>
+        <div class="bg-slide" style="background-image: url('IMG_0715.jpeg');"></div>
+    </div>
+    <div class="bg-overlay"></div>
+
+    <!-- 背景 Canvas 粒子動畫 (心心與微光) -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- 慶祝煙花 Confetti Canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <div class="container">
+        <!-- 31st 生日專屬橫幅 -->
+        <div class="birthday-badge-wrapper">
+            <div class="birthday-badge">
+                <span>🎂</span> Cherie Ma 31st Birthday VIP <span>✨</span>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-yt">
+                <div class="play-triangle"></div>
+            </div>
+            <span class="logo-text">YouTube</span>
+            <span class="premium-tag">LIMITED PASS</span>
+        </div>
+
+        <!-- 內容區 -->
+        <div>
+            <h1 class="title">Happy Birthday Cherie! ❤️</h1>
+            <p class="subtitle">祝 Cherie Ma 31 歲生日快樂！這是為你準備的專屬 YouTube Premium 零廣告權益通行證。</p>
+
+            <!-- 可展開的情書與 GitHub 相冊 -->
+            <button type="button" class="easter-egg-btn" id="easterEggBtn">
+                <span>💌</span> 點擊開啟給 Cherie 的甜蜜回憶錄與情書
+            </button>
+            <div class="love-note-card" id="loveNoteCard">
+                <div class="love-note-text">
+                    「Cherie，31 歲生日快樂！🎉<br>
+                    與妳走過海角天涯，每一幕都是最美的風景。<br>
+                    願這張通行證陪妳聽盡喜歡的歌，永遠陪妳看世界！❤️」
+                </div>
+
+                <!-- GitHub 專屬相冊輪播器 -->
+                <div class="photo-gallery-slider">
+                    <div class="gallery-img-container">
+                        <img src="IMG_0534.jpeg" class="gallery-img active" alt="Cherie Memory 1" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';">
+                        <img src="IMG_0592.jpeg" class="gallery-img" alt="Cherie Memory 2" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=800&q=80';">
+                        <img src="IMG_0611.jpeg" class="gallery-img" alt="Cherie Memory 3" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80';">
+                        <img src="IMG_0628.jpeg" class="gallery-img" alt="Cherie Memory 4" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=800&q=80';">
+                        <img src="IMG_0637.jpeg" class="gallery-img" alt="Cherie Memory 5" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=800&q=80';">
+                        <img src="IMG_0715.jpeg" class="gallery-img" alt="Cherie Memory 6" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1471922694854-ff1b63b20054?auto=format&fit=crop&w=800&q=80';">
+                    </div>
+                    <button class="slider-btn prev" id="sliderPrev">❮</button>
+                    <button class="slider-btn next" id="sliderNext">❯</button>
+                    <div class="slider-dots" id="sliderDots">
+                        <div class="dot active"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 權益卡片 -->
+            <div class="card-preview">
+                <div class="plan-name">31st Birthday Exclusive Pass</div>
+                <div class="member-title">YouTube Premium 零廣告通行證</div>
+                <ul class="features">
+                    <li><span class="icon">✨</span> 全平台無廣告干擾觀看（陪你睇一世）</li>
+                    <li><span class="icon">🎵</span> YouTube Music 無限收聽浪漫歌單</li>
+                    <li><span class="icon">✈️</span> 支援背景播放與離線下載（旅行必備）</li>
+                    <li><span class="icon">👑</span> 專屬 VIP 24/7 全天候開通服務</li>
+                </ul>
+            </div>
+
+            <!-- Email 表單 -->
+            <form id="redeemForm">
+                <div class="form-group">
+                    <label class="label" for="email">請輸入 Cherie 的 Google / YouTube Email：</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        class="email-input" 
+                        placeholder="cherie@gmail.com" 
+                        required 
+                        autocomplete="off"
+                    >
+                </div>
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span>🎁</span> 通過 WhatsApp 開通 31 歲特權
+                </button>
+            </form>
+        </div>
+
+        <div class="footer-note">
+            © YouTube Premium · Special Birthday Pass for Cherie Ma<br>
+            Made with ❤️ for Cherie's 31st Birthday
+        </div>
+    </div>
+
+    <!-- 成功提示 Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-icon">🎂</div>
+            <div class="modal-title">準備發送開通申請！</div>
+            <div class="modal-desc">已為 Cherie 準備好 31 歲生日 VIP 驗證訊息。請點擊下方按鈕開啟 WhatsApp：</div>
+            <a href="#" id="waDirectLink" target="_blank" class="manual-wa-btn">開啟 WhatsApp 發送禮物申請</a>
+        </div>
+    </div>
+
+    <script>
+        // 1. 全頁背景圖片輪播 (調用 GitHub 照片)
+        const bgSlides = document.querySelectorAll('.bg-slide');
+        let currentBgIdx = 0;
+
+        setInterval(() => {
+            bgSlides[currentBgIdx].classList.remove('active');
+            currentBgIdx = (currentBgIdx + 1) % bgSlides.length;
+            bgSlides[currentBgIdx].classList.add('active');
+        }, 5000);
+
+        // 2. 小心思情書與相冊展開
+        const easterEggBtn = document.getElementById('easterEggBtn');
+        const loveNoteCard = document.getElementById('loveNoteCard');
+
+        easterEggBtn.addEventListener('click', () => {
+            loveNoteCard.classList.toggle('active');
+            triggerHeartsBurst();
+        });
+
+        // 3. GitHub 照片相冊 Carousel 控制 logic
+        const galleryImgs = document.querySelectorAll('.gallery-img');
+        const dots = document.querySelectorAll('.dot');
+        const prevBtn = document.getElementById('sliderPrev');
+        const nextBtn = document.getElementById('sliderNext');
+        let galleryIdx = 0;
+
+        function showSlide(index) {
+            if (index < 0) index = galleryImgs.length - 1;
+            if (index >= galleryImgs.length) index = 0;
+            
+            galleryImgs.forEach((img, i) => {
+                img.classList.toggle('active', i === index);
+            });
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+            galleryIdx = index;
+        }
+
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showSlide(galleryIdx - 1);
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showSlide(galleryIdx + 1);
+        });
+
+        dots.forEach((dot, idx) => {
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showSlide(idx);
+            });
+        });
+
+        // 4. 動態背景 Canvas (心心與微光粒子)
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resizeBgCanvas() {
+            width = bgCanvas.width = window.innerWidth;
+            height = bgCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeBgCanvas);
+        resizeBgCanvas();
+
+        class HeartParticle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height + Math.random() * 20;
+                this.size = Math.random() * 12 + 6;
+                this.speedY = -(Math.random() * 0.8 + 0.4);
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.type = Math.random() > 0.6 ? 'heart' : 'sparkle';
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y < -20) this.reset();
+            }
+            draw() {
+                bgCtx.save();
+                bgCtx.globalAlpha = this.opacity;
+                if (this.type === 'heart') {
+                    bgCtx.fillStyle = '#ff5e84';
+                    bgCtx.font = `${this.size}px serif`;
+                    bgCtx.fillText('❤️', this.x, this.y);
+                } else {
+                    bgCtx.fillStyle = '#ffd1dc';
+                    bgCtx.beginPath();
+                    bgCtx.arc(this.x, this.y, this.size / 3, 0, Math.PI * 2);
+                    bgCtx.fill();
+                }
+                bgCtx.restore();
+            }
+        }
+
+        for (let i = 0; i < 35; i++) particles.push(new HeartParticle());
+
+        function triggerHeartsBurst() {
+            for (let i = 0; i < 15; i++) {
+                const p = new HeartParticle();
+                p.x = window.innerWidth / 2 + (Math.random() - 0.5) * 200;
+                p.y = window.innerHeight / 2;
+                p.speedY = -(Math.random() * 2 + 1);
+                p.opacity = 1;
+                particles.push(p);
+            }
+        }
+
+        function animateBg() {
+            bgCtx.clearRect(0, 0, width, height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // 5. Confetti 彩紙煙花動畫
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let confettiList = [];
+
+        function resizeConfettiCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeConfettiCanvas);
+        resizeConfettiCanvas();
+
+        class Confetti {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 10 + 6;
+                this.color = ['#25D366', '#ff2a5f', '#FFD700', '#FFFFFF', '#ff8ca3', '#3EA6FF'][Math.floor(Math.random() * 6)];
+                this.vx = (Math.random() - 0.5) * 14;
+                this.vy = (Math.random() - 0.8) * 14;
+                this.gravity = 0.22;
+                this.opacity = 1;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 12;
+                this.isHeart = Math.random() > 0.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.opacity -= 0.012;
+                this.rotation += this.rotationSpeed;
+            }
+
+            draw() {
+                confettiCtx.save();
+                confettiCtx.translate(this.x, this.y);
+                confettiCtx.rotate((this.rotation * Math.PI) / 180);
+                confettiCtx.globalAlpha = Math.max(0, this.opacity);
+                
+                if (this.isHeart) {
+                    confettiCtx.fillStyle = '#ff2a5f';
+                    confettiCtx.font = `${this.size * 1.5}px serif`;
+                    confettiCtx.fillText('💖', 0, 0);
+                } else {
+                    confettiCtx.fillStyle = this.color;
+                    confettiCtx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                }
+                confettiCtx.restore();
+            }
+        }
+
+        function triggerConfetti() {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            for (let i = 0; i < 130; i++) {
+                confettiList.push(new Confetti(centerX, centerY));
+            }
+        }
+
+        function animateConfetti() {
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            for (let i = confettiList.length - 1; i >= 0; i--) {
+                confettiList[i].update();
+                confettiList[i].draw();
+                if (confettiList[i].opacity <= 0) confettiList.splice(i, 1);
+            }
+            requestAnimationFrame(animateConfetti);
+        }
+        animateConfetti();
+
+        // 6. WhatsApp 號碼與表單觸發
+        const myPhoneNumber = "85293743315"; 
+        const form = document.getElementById('redeemForm');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const waDirectLink = document.getElementById('waDirectLink');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+
+            triggerConfetti();
+
+            const message = `🎉 Cherie Ma 31歲生日特別版 YouTube Premium 開通申請！\n\nCherie 嘅 Email：${email}\n\n請即刻幫 Cherie 完成 31 歲專屬 VIP 激活！❤️🎂✨`;
+            const waUrl = `https://wa.me/${myPhoneNumber}?text=${encodeURIComponent(message)}`;
+
+            waDirectLink.href = waUrl;
+            modalOverlay.style.display = 'flex';
+
+            // 立即開啟 WhatsApp
+            window.open(waUrl, '_blank');
+        });
+    </script>
+</body>
+</html>
